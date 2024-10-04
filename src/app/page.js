@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import styles from './home.module.css'; // Arquivo CSS para estilos
+import styles from './home.module.css';
 
 export default function Home() {
   const [filmes, setFilmes] = useState([]);
@@ -26,20 +26,18 @@ export default function Home() {
     fetchFilmes();
   }, []);
 
-  const handleSubmit = async (event) => {
+  // Função para criar um novo filme
+  const handleCreate = async (event) => {
     event.preventDefault();
     const dadosFilme = { titulo, ano, lancamento, genero, diretor };
 
     try {
-      const method = editandoId ? 'PUT' : 'POST';
-      const url = editandoId ? `/api/filmes` : `/api/filmes`;
-
-      const response = await fetch(url, {
-        method: method,
+      const response = await fetch('/api/filmes', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(editandoId ? { id: editandoId, ...dadosFilme } : dadosFilme),
+        body: JSON.stringify(dadosFilme),
       });
 
       if (response.ok) {
@@ -47,7 +45,33 @@ export default function Home() {
         resetForm();
       } else {
         const errorData = await response.json();
-        console.error('Erro ao cadastrar/atualizar filme:', errorData);
+        console.error('Erro ao cadastrar filme:', errorData);
+      }
+    } catch (error) {
+      console.error('Erro ao conectar a API:', error);
+    }
+  };
+
+  // Função para atualizar um filme existente
+  const handleUpdate = async (event) => {
+    event.preventDefault();
+    const dadosFilme = { titulo, ano, lancamento, genero, diretor };
+
+    try {
+      const response = await fetch(`/api/filmes`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: editandoId, ...dadosFilme }),
+      });
+
+      if (response.ok) {
+        fetchFilmes();
+        resetForm();
+      } else {
+        const errorData = await response.json();
+        console.error('Erro ao atualizar filme:', errorData);
       }
     } catch (error) {
       console.error('Erro ao conectar a API:', error);
@@ -96,7 +120,7 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>🎬 Cadastro de Filmes</h1>
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={editandoId ? handleUpdate : handleCreate} className={styles.form}>
         <div className={styles.inputGroup}>
           <label htmlFor="titulo">Título</label>
           <input

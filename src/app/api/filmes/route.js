@@ -5,6 +5,7 @@ const prisma = new PrismaClient();
 // Criar um novo filme
 export async function POST(request) {
   const body = await request.json();
+  
   console.log('Método: POST');
   console.log('Corpo da requisição:', body);
 
